@@ -1,0 +1,122 @@
+@model DoctorAppointmentSystem.ViewModels.AdminAppointmentFilterViewModel
+@{
+    ViewData["Title"] = "All Appointments";
+}
+
+<div class="page-header">
+    <h2 class="section-title mb-0"><i class="bi bi-calendar3 me-2 text-primary"></i>All Appointments</h2>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-semibold small">Date</label>
+                <input type="date" name="date" value="@Model.FilterDate?.ToString("yyyy-MM-dd")" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold small">Mode</label>
+                <select name="mode" class="form-select">
+                    <option value="">All Modes</option>
+                    <option value="1" selected="@(Model.FilterMode == DoctorAppointmentSystem.Models.AppointmentMode.Online)">Online</option>
+                    <option value="2" selected="@(Model.FilterMode == DoctorAppointmentSystem.Models.AppointmentMode.Offline)">Offline</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold small">Status</label>
+                <select name="status" class="form-select">
+                    <option value="">All Statuses</option>
+                    @foreach (var s in Enum.GetValues<DoctorAppointmentSystem.Models.AppointmentStatus>())
+                    {
+                        <option value="@((int)s)" selected="@(Model.FilterStatus == s)">@s</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-fill"><i class="bi bi-funnel me-1"></i>Filter</button>
+                <a asp-action="Appointments" class="btn btn-outline-secondary"><i class="bi bi-x"></i></a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header bg-white d-flex justify-content-between">
+        <span class="fw-semibold">@Model.Appointments.Count() appointment(s)</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Patient</th>
+                    <th>Doctor</th>
+                    <th>Specialty</th>
+                    <th>Date & Time</th>
+                    <th>Mode</th>
+                    <th>Fee</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var a in Model.Appointments)
+                {
+                    var statusClass = a.Status switch {
+                        DoctorAppointmentSystem.Models.AppointmentStatus.Confirmed => "badge-confirmed",
+                        DoctorAppointmentSystem.Models.AppointmentStatus.Completed => "badge-completed",
+                        DoctorAppointmentSystem.Models.AppointmentStatus.Cancelled => "badge-cancelled",
+                        DoctorAppointmentSystem.Models.AppointmentStatus.NoShow    => "badge-noshow",
+                        _ => "badge-pending"
+                    };
+                    <tr>
+                        <td class="small text-muted">#@a.Id</td>
+                        <td class="small">@a.PatientName</td>
+                        <td class="small">@a.DoctorName</td>
+                        <td class="small">@a.SpecialtyName</td>
+                        <td class="small">
+                            @a.AppointmentDate.ToString("MMM d, yyyy")<br />
+                            <span class="text-muted">@a.SlotStart.ToString("h:mm tt")</span>
+                        </td>
+                        <td>
+                            <span class="badge @(a.Mode == DoctorAppointmentSystem.Models.AppointmentMode.Online ? "mode-badge-online" : "mode-badge-offline") small">
+                                @a.Mode
+                            </span>
+                        </td>
+                        <td class="small fw-semibold text-primary">$@a.ConsultationFee</td>
+                        <td><span class="badge @statusClass">@a.Status</span></td>
+                        <td>
+                            @if (a.Status == DoctorAppointmentSystem.Models.AppointmentStatus.Confirmed)
+                            {
+                                <div class="d-flex gap-1">
+                                    <form asp-action="UpdateStatus" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@a.Id" />
+                                        <input type="hidden" name="status" value="3" />
+                                        <button type="submit" class="btn btn-xs btn-success" style="font-size:.75rem;padding:2px 8px"
+                                                data-confirm="Mark as Completed?">✓ Done</button>
+                                    </form>
+                                    <form asp-action="UpdateStatus" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@a.Id" />
+                                        <input type="hidden" name="status" value="5" />
+                                        <button type="submit" class="btn btn-xs btn-warning" style="font-size:.75rem;padding:2px 8px"
+                                                data-confirm="Mark as No-Show?">No-Show</button>
+                                    </form>
+                                    <form asp-action="UpdateStatus" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@a.Id" />
+                                        <input type="hidden" name="status" value="4" />
+                                        <button type="submit" class="btn btn-xs btn-danger" style="font-size:.75rem;padding:2px 8px"
+                                                data-confirm="Cancel this appointment?">Cancel</button>
+                                    </form>
+                                </div>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

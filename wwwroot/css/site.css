@@ -1,0 +1,98 @@
+/* ── MediBook Global Styles ── */
+
+:root {
+    --primary: #0d6efd;
+    --primary-dark: #0a58ca;
+    --success: #198754;
+    --card-shadow: 0 2px 12px rgba(0,0,0,.08);
+}
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* ── Navbar ── */
+.navbar-brand { letter-spacing: -.5px; }
+
+/* ── Hero Section ── */
+.hero-section {
+    background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 60%, #084298 100%);
+    color: white;
+    padding: 80px 0;
+    border-radius: 0 0 2rem 2rem;
+    margin-bottom: 2rem;
+}
+
+.hero-section h1 { font-size: 2.8rem; font-weight: 700; }
+.hero-section p  { font-size: 1.2rem; opacity: .9; }
+
+/* ── Cards ── */
+.card {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: var(--card-shadow);
+    transition: transform .2s, box-shadow .2s;
+}
+
+.card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,.12); }
+
+.card-header {
+    border-radius: 1rem 1rem 0 0 !important;
+    font-weight: 600;
+}
+
+/* ── Doctor Cards ── */
+.doctor-card .doctor-avatar {
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0d6efd, #6610f2);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 1.8rem; font-weight: 700;
+    flex-shrink: 0;
+}
+
+.mode-badge-online  { background: #d1e7dd; color: #0f5132; }
+.mode-badge-offline { background: #cfe2ff; color: #084298; }
+
+/* ── Slot Picker ── */
+.slot-btn {
+    min-width: 90px;
+    border-radius: .5rem;
+    font-size: .85rem;
+    transition: all .15s;
+}
+
+.slot-btn:hover:not(:disabled) { transform: scale(1.05); }
+.slot-btn.selected { background: #0d6efd; color: white; border-color: #0d6efd; }
+.slot-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ── Status Badges ── */
+.badge-pending   { background: #fff3cd; color: #856404; }
+.badge-confirmed { background: #cfe2ff; color: #084298; }
+.badge-completed { background: #d1e7dd; color: #0f5132; }
+.badge-cancelled { background: #f8d7da; color: #842029; }
+.badge-noshow    { background: #e2e3e5; color: #41464b; }
+
+/* ── Stat Cards (Admin) ── */
+.stat-card { border-left: 4px solid var(--primary); }
+.stat-card .stat-icon { font-size: 2.5rem; opacity: .15; }
+.stat-card .stat-value { font-size: 2rem; font-weight: 700; }
+
+/* ── Tables ── */
+.table th { font-weight: 600; font-size: .85rem; text-transform: uppercase; letter-spacing: .05em; color: #6c757d; }
+
+/* ── Auth Pages ── */
+.auth-card { max-width: 460px; margin: 60px auto; }
+.auth-card .card-header { padding: 1.5rem; text-align: center; }
+
+/* ── Misc ── */
+.page-header { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 2px solid #e9ecef; }
+.section-title { font-weight: 700; color: #212529; }
+.text-muted-sm { font-size: .85rem; color: #6c757d; }
+
+/* ── Responsive ── */
+@media (max-width: 576px) {
+    .hero-section h1 { font-size: 1.8rem; }
+    .hero-section { padding: 50px 0; }
+}

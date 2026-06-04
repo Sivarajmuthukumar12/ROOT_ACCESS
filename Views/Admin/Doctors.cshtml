@@ -1,0 +1,76 @@
+@model IEnumerable<DoctorAppointmentSystem.DTOs.DoctorResponse>
+@{
+    ViewData["Title"] = "Manage Doctors";
+}
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h2 class="section-title mb-0"><i class="bi bi-person-badge me-2 text-primary"></i>Manage Doctors</h2>
+    <a asp-action="CreateDoctor" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i>Add Doctor
+    </a>
+</div>
+
+<div class="alert alert-info small py-2">
+    <i class="bi bi-info-circle me-2"></i>
+    <strong>Strict Rule:</strong> Each doctor is assigned to either <strong>Online</strong> or <strong>Offline</strong> mode only. This cannot be changed after creation.
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Doctor</th>
+                    <th>Specialty</th>
+                    <th>Mode</th>
+                    <th>Fee</th>
+                    <th>Location / Link</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var d in Model)
+                {
+                    <tr class="@(!d.IsActive ? "table-secondary" : "")">
+                        <td>
+                            <div class="fw-semibold">@d.FullName</div>
+                            <div class="text-muted small">@d.Email</div>
+                        </td>
+                        <td class="small">@d.SpecialtyName</td>
+                        <td>
+                            <span class="badge @(d.Mode == DoctorAppointmentSystem.Models.AppointmentMode.Online ? "mode-badge-online" : "mode-badge-offline")">
+                                <i class="bi @(d.Mode == DoctorAppointmentSystem.Models.AppointmentMode.Online ? "bi-camera-video" : "bi-hospital") me-1"></i>
+                                @d.Mode
+                            </span>
+                        </td>
+                        <td class="fw-semibold text-primary">$@d.ConsultationFee</td>
+                        <td class="small text-muted">@(d.ClinicLocation ?? "—")</td>
+                        <td>
+                            @if (d.IsActive)
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inactive</span>
+                            }
+                        </td>
+                        <td>
+                            @if (d.IsActive)
+                            {
+                                <form asp-action="DeactivateDoctor" asp-route-id="@d.Id" method="post">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                            data-confirm="Deactivate Dr. @d.FullName?">
+                                        <i class="bi bi-person-dash"></i>
+                                    </button>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

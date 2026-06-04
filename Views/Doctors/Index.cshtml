@@ -1,0 +1,115 @@
+@model DoctorAppointmentSystem.ViewModels.DoctorListViewModel
+@{
+    ViewData["Title"] = "Find a Doctor";
+}
+
+<div class="page-header d-flex justify-content-between align-items-center">
+    <h2 class="section-title mb-0"><i class="bi bi-person-badge me-2 text-primary"></i>Find a Doctor</h2>
+    <span class="text-muted small">@Model.Doctors.Count() doctor(s) found</span>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label fw-semibold small">Search</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" value="@Model.SearchTerm" class="form-control" placeholder="Doctor name or specialty..." />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold small">Specialty</label>
+                <select name="specialtyId" class="form-select">
+                    <option value="">All Specialties</option>
+                    @foreach (var s in Model.Specialties)
+                    {
+                        <option value="@s.Id" selected="@(Model.SelectedSpecialtyId == s.Id)">@s.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold small">Appointment Mode</label>
+                <select name="mode" class="form-select">
+                    <option value="">All Modes</option>
+                    <option value="1" selected="@(Model.SelectedMode == DoctorAppointmentSystem.Models.AppointmentMode.Online)">
+                        🎥 Online (Teleconsultation)
+                    </option>
+                    <option value="2" selected="@(Model.SelectedMode == DoctorAppointmentSystem.Models.AppointmentMode.Offline)">
+                        🏥 Offline (In-Clinic)
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-fill">
+                    <i class="bi bi-funnel me-1"></i>Filter
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-x"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Mode info banner -->
+<div class="alert alert-info py-2 small mb-4">
+    <i class="bi bi-info-circle me-2"></i>
+    <strong>Note:</strong> Online and Offline appointments use <strong>different doctors</strong>. Each doctor is dedicated to one mode only.
+</div>
+
+<!-- Doctor Grid -->
+@if (!Model.Doctors.Any())
+{
+    <div class="text-center py-5">
+        <i class="bi bi-person-x fs-1 text-muted"></i>
+        <p class="text-muted mt-3">No doctors found matching your criteria.</p>
+        <a asp-action="Index" class="btn btn-outline-primary">Clear Filters</a>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var doc in Model.Doctors)
+        {
+            <div class="col-md-6 col-lg-4">
+                <div class="card doctor-card h-100">
+                    <div class="card-body p-4">
+                        <div class="d-flex gap-3 align-items-start mb-3">
+                            <div class="doctor-avatar">@doc.FullName[3]</div>
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold mb-0">@doc.FullName</h6>
+                                <div class="text-muted small">@doc.SpecialtyName</div>
+                                <span class="badge mt-1 @(doc.Mode == DoctorAppointmentSystem.Models.AppointmentMode.Online ? "mode-badge-online" : "mode-badge-offline")">
+                                    <i class="bi @(doc.Mode == DoctorAppointmentSystem.Models.AppointmentMode.Online ? "bi-camera-video" : "bi-hospital") me-1"></i>
+                                    @doc.Mode
+                                </span>
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(doc.Bio))
+                        {
+                            <p class="text-muted small mb-3" style="line-height:1.4">@doc.Bio</p>
+                        }
+
+                        @if (doc.Mode == DoctorAppointmentSystem.Models.AppointmentMode.Offline && !string.IsNullOrEmpty(doc.ClinicLocation))
+                        {
+                            <p class="small text-muted mb-3">
+                                <i class="bi bi-geo-alt me-1 text-danger"></i>@doc.ClinicLocation
+                            </p>
+                        }
+
+                        <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
+                            <span class="fw-bold text-primary fs-5">$@doc.ConsultationFee</span>
+                            <a asp-controller="Doctors" asp-action="Detail" asp-route-id="@doc.Id"
+                               class="btn btn-primary btn-sm px-3">
+                                <i class="bi bi-calendar-plus me-1"></i>Book Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

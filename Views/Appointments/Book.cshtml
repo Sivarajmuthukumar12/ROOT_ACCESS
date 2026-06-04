@@ -1,0 +1,121 @@
+@model DoctorAppointmentSystem.ViewModels.BookAppointmentViewModel
+@{
+    ViewData["Title"] = "Book Appointment";
+    var isOnline = Model.Doctor.Mode == DoctorAppointmentSystem.Models.AppointmentMode.Online;
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-controller="Doctors" asp-action="Index">Doctors</a></li>
+        <li class="breadcrumb-item">
+            <a asp-controller="Doctors" asp-action="Detail" asp-route-id="@Model.DoctorId">@Model.Doctor.FullName</a>
+        </li>
+        <li class="breadcrumb-item active">Book Appointment</li>
+    </ol>
+</nav>
+
+<div class="row g-4">
+    <!-- Doctor Summary -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-body p-4">
+                <div class="d-flex gap-3 align-items-center mb-3">
+                    <div class="doctor-avatar" style="width:60px;height:60px;font-size:1.5rem">
+                        @Model.Doctor.FullName[3]
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-0">@Model.Doctor.FullName</h6>
+                        <div class="text-muted small">@Model.Doctor.SpecialtyName</div>
+                    </div>
+                </div>
+                <span class="badge @(isOnline ? "mode-badge-online" : "mode-badge-offline") px-3 py-2 mb-3 d-block text-center">
+                    <i class="bi @(isOnline ? "bi-camera-video" : "bi-hospital") me-2"></i>@Model.Doctor.Mode Appointment
+                </span>
+                <div class="d-flex justify-content-between small">
+                    <span class="text-muted">Consultation Fee</span>
+                    <span class="fw-bold text-primary fs-5">$@Model.Doctor.ConsultationFee</span>
+                </div>
+                @if (!isOnline && !string.IsNullOrEmpty(Model.Doctor.ClinicLocation))
+                {
+                    <div class="mt-2 small text-muted">
+                        <i class="bi bi-geo-alt me-1 text-danger"></i>@Model.Doctor.ClinicLocation
+                    </div>
+                }
+                @if (isOnline)
+                {
+                    <div class="alert alert-success mt-3 py-2 small">
+                        <i class="bi bi-camera-video-fill me-1"></i>Meeting link generated after booking.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Form -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-white fw-bold">
+                <i class="bi bi-calendar-plus me-2 text-primary"></i>Select Date & Time Slot
+            </div>
+            <div class="card-body p-4">
+                <!-- Date picker -->
+                <form method="get" class="d-flex gap-3 align-items-end mb-4">
+                    <div>
+                        <label class="form-label fw-semibold small">Appointment Date</label>
+                        <input type="date" name="date" value="@Model.AppointmentDate.ToString("yyyy-MM-dd")"
+                               min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")"
+                               class="form-control" />
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Refresh Slots
+                    </button>
+                </form>
+
+                @if (!Model.Slots.Any())
+                {
+                    <div class="alert alert-warning">
+                        <i class="bi bi-calendar-x me-2"></i>No availability on this day. Please try another date.
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted small mb-3">
+                        <strong>@Model.AppointmentDate.ToString("dddd, MMMM d, yyyy")</strong> —
+                        @Model.Slots.Count(s => !s.IsBooked) slot(s) available
+                    </p>
+
+                    <form asp-action="BookConfirm" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="DoctorId" value="@Model.DoctorId" />
+                        <input type="hidden" name="AppointmentDate" value="@Model.AppointmentDate.ToString("yyyy-MM-dd")" />
+                        <input type="hidden" id="selectedSlot" name="SelectedSlot" value="" />
+
+                        <div class="d-flex flex-wrap gap-2 mb-4">
+                            @foreach (var slot in Model.Slots)
+                            {
+                                <button type="button"
+                                        class="btn btn-outline-primary slot-btn @(slot.IsBooked ? "" : "")"
+                                        data-slot="@slot.Start.ToString("HH:mm")"
+                                        @(slot.IsBooked ? "disabled" : "")>
+                                    @slot.Start.ToString("h:mm tt")
+                                    @if (slot.IsBooked) { <br /><small>Taken</small> }
+                                </button>
+                            }
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small">Notes (optional)</label>
+                            <textarea name="Notes" class="form-control" rows="3"
+                                      placeholder="Describe your symptoms or reason for visit..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg px-5 fw-semibold"
+                                onclick="if(!document.getElementById('selectedSlot').value){alert('Please select a time slot.');return false;}">
+                            <i class="bi bi-calendar-check me-2"></i>Confirm Booking — $@Model.Doctor.ConsultationFee
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+    </div>
+</div>
